@@ -1,0 +1,27 @@
+.DS_Store
+.env
+.python-version
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Frontend / Tauri
+HybrideWatch\ AI/node_modules/
+HybrideWatch\ AI/dist/
+HybrideWatch\ AI/src-tauri/target/
+
+# Editor files
+.vscode/
+.idea/
+
+# LogsQ
+*.log
+*.err

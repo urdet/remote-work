@@ -1,0 +1,1 @@
+"""SmartPresence desktop backend package."""
