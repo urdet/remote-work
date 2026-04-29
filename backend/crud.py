@@ -289,10 +289,11 @@ def get_screenshots_by_date_and_pin(db: Session, date_key: str, employee_pin: st
     return [_capture_dict(capture) for capture in captures]
 
 
-def get_activities_by_date(db: Session, date_key: str) -> list[dict]:
+def get_activities_by_date_and_pin(db: Session, date_key: str, employee_pin: str) -> list[dict]:
     captures = (
         db.query(models.AgentCapture)
         .filter(
+            models.AgentCapture.employee_pin == employee_pin,
             models.AgentCapture.captured_at >= _parse_datetime(f"{date_key}T00:00:00"),
             models.AgentCapture.captured_at < _parse_datetime(f"{date_key}T23:59:59.999999"),
         )
@@ -313,31 +314,13 @@ def get_activities_by_date(db: Session, date_key: str) -> list[dict]:
     ]
 
 
-def get_timing_task(db: Session, date_key: str, task_id: str) -> dict:
+def get_timings_day(db: Session, date_key: str, employee_pin: str) -> dict:
     events = (
         db.query(models.AgentTimerEvent)
         .filter(
             models.AgentTimerEvent.date_key == date_key,
-            models.AgentTimerEvent.session_id == task_id,
+            models.AgentTimerEvent.employee_pin == employee_pin,
         )
-        .order_by(models.AgentTimerEvent.event_at.asc())
-        .all()
-    )
-    total_seconds = max((event.elapsed_seconds for event in events), default=0)
-    final_status = "running" if events and events[-1].event_type == "start" else "stopped"
-    return {
-        "task_id": task_id,
-        "date": date_key,
-        "total_seconds": total_seconds,
-        "status": final_status,
-        "logs": [_timer_event_dict(event) for event in events],
-    }
-
-
-def get_timings_day(db: Session, date_key: str) -> dict:
-    events = (
-        db.query(models.AgentTimerEvent)
-        .filter(models.AgentTimerEvent.date_key == date_key)
         .order_by(models.AgentTimerEvent.event_at.asc())
         .all()
     )
@@ -349,16 +332,18 @@ def get_timings_day(db: Session, date_key: str) -> dict:
         )
     return {
         "date": date_key,
+        "employee_pin": employee_pin,
         "total_seconds": sum(totals_by_session.values()),
         "logs": [_timer_event_dict(event) for event in events],
     }
 
 
-def get_general_report(db: Session, date_key: str) -> dict:
-    captures = get_activities_by_date(db, date_key)
-    timings = get_timings_day(db, date_key)
+def get_general_report(db: Session, date_key: str, employee_pin: str) -> dict:
+    captures = get_activities_by_date_and_pin(db, date_key, employee_pin)
+    timings = get_timings_day(db, date_key, employee_pin)
     return {
         "date": date_key,
+        "employee_pin": employee_pin,
         "tasks": [],
         "activities": captures,
         "timings": timings,

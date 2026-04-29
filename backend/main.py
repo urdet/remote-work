@@ -103,27 +103,14 @@ def get_screenshots(date: str, employee_pin: str, db: Session = Depends(get_db))
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@app.get("/getActivities/{date}")
-def get_activities(date: str, db: Session = Depends(get_db)):
-    try:
-        return {"items": crud.get_activities_by_date(db, date)}
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+@app.get("/getTimingsDay/{date}/{employee_pin}")
+def get_timings_day(date: str, employee_pin: str, db: Session = Depends(get_db)):
+    return crud.get_timings_day(db, date, employee_pin)
 
 
-@app.get("/getTimingTask/{date}/{task_id}")
-def get_timing_task(date: str, task_id: str, db: Session = Depends(get_db)):
-    return crud.get_timing_task(db, date, task_id)
-
-
-@app.get("/getTimingsDay/{date}")
-def get_timings_day(date: str, db: Session = Depends(get_db)):
-    return crud.get_timings_day(db, date)
-
-
-@app.get("/getGeneralReport/{date}")
-def get_general_report(date: str, db: Session = Depends(get_db)):
-    return crud.get_general_report(db, date)
+@app.get("/getGeneralReport/{date}/{employee_pin}")
+def get_general_report(date: str, employee_pin: str, db: Session = Depends(get_db)):
+    return crud.get_general_report(db, date, employee_pin)
 
 
 @app.get("/agent/timer-events")
